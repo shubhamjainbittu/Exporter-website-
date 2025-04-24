@@ -1,0 +1,246 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export Business Website</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React and Babel CDNs -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.22.9/babel.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    .hero-bg {
+      background: linear-gradient(to right, #1e3a8a, #3b82f6);
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-2xl font-bold text-blue-600">ExportHub</h1>
+        </div>
+        <div class="hidden md:flex space-x-8 items-center">
+          <a href="#home" class="text-gray-700 hover:text-blue-600">Home</a>
+          <a href="#products" class="text-gray-700 hover:text-blue-600">Products</a>
+          <a href="#about" class="text-gray-700 hover:text-blue-600">About</a>
+          <a href="#contact" class="text-gray-700 hover:text-blue-600">Contact</a>
+        </div>
+        <div class="md:hidden flex items-center">
+          <button id="menu-toggle" class="text-gray-700 focus:outline-none">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white shadow-md">
+      <a href="#home" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">Home</a>
+      <a href="#products" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">Products</a>
+      <a href="#about" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">About</a>
+      <a href="#contact" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero-bg text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-4">Your Gateway to Global Markets</h2>
+      <p class="text-lg md:text-xl mb-6">Export high-quality Indian products worldwide with ExportHub.</p>
+      <a href="#contact" class="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-100">Get Started</a>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section id="products" class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center mb-12">Our Products</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <img src="https://via.placeholder.com/300x200?text=Spices" alt="Spices" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">Organic Spices</h3>
+            <p class="text-gray-600">Premium quality turmeric, cumin, and chili from India.</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <img src="https://via.placeholder.com/300x200?text=Handicrafts" alt="Handicrafts" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">Handicrafts</h3>
+            <p class="text-gray-600">Handmade jute bags and terracotta decor.</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <img src="https://via.placeholder.com/300x200?text=Textiles" alt="Textiles" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">Textiles</h3>
+            <p class="text-gray-600">Cotton sarees and block-printed kurtis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="bg-gray-50 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-6">About Us</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">ExportHub is your trusted partner for exporting Indian products globally. We source high-quality goods directly from artisans and farmers to deliver authenticity and value.</p>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center mb-12">Contact Us</h2>
+      <div id="contact-form-root" class="max-w-lg mx-auto"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p>&copy; 2025 ExportHub. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript for Mobile Menu and React Contact Form -->
+  <script type="text/babel">
+    // Mobile Menu Toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuToggle.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // React Contact Form Component
+    function ContactForm() {
+      const [formData, setFormData] = React.useState({
+        name: '',
+        email: '',
+        message: ''
+      });
+
+      const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        alert('Form submitted! Name: ' + formData.name + ', Email: ' + formData.email + ', Message: ' + formData.message);
+        // Add backend API call here if needed
+        setFormData({ name: '', email: '', message: '' });
+      };
+
+      return (
+        <div className="bg-white p-8 rounded-lg shadow-md">
+          <h3 className="text-2xl font-semibold mb-6 text-center">Get in Touch</h3>
+          <div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-1" htmlFor="name">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  placeholder="Your Name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1" htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  placeholder="Your Email"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1" htmlFor="message">Message</label>
+                <textarea
+                  name="message"
+                  id="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  rows="5"
+                  placeholder="Your Message"
+                  required
+                ></textarea>
+              </div>
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700"
+              >
+                Send Message
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Render React Component
+    const root = ReactDOM.createRoot(document.getElementById('contact-form-root'));
+    root.render(<ContactForm />);
+  </script>
+</body>
+</html>
